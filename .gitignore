@@ -1,0 +1,11 @@
+node_modules
+dist
+.venv
+venv
+.env
+.env.production
+*.db
+uploads
+.DS_Store
+__pycache__
+.pytest_cache
