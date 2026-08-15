@@ -13,4 +13,5 @@ This GitHub repo is a **sanitized public slice**.
 
 - Architecture and ontology building blocks
 - Synthetic supply-chain samples
-- Sanitized runtime after secret scan (D2)
+- Sanitized runtime after secret scan
+- Synthetic ontology mapping (object / link / logic / action)

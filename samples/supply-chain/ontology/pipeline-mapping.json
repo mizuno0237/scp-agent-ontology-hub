@@ -1,0 +1,30 @@
+{
+  "pipeline": "sample-po-json-to-ontology",
+  "input": "samples/supply-chain/supplier_orders.json",
+  "steps": [
+    {
+      "extract": "supplier",
+      "as": "Supplier",
+      "example": { "id": "SUP-001", "name": "synthetic mill", "tier": "S" }
+    },
+    {
+      "extract": "order header",
+      "as": "PurchaseOrder",
+      "example": { "order_id": "PO-2024-0001", "status": "completed" }
+    },
+    {
+      "extract": "items[]",
+      "as": "OrderLine",
+      "link": { "type": "HAS_LINE", "from": "PurchaseOrder" }
+    },
+    {
+      "extract": "logistics",
+      "as": "Shipment",
+      "link": { "type": "HAS_SHIPMENT", "from": "PurchaseOrder" }
+    },
+    {
+      "link": { "type": "HAS_SUPPLIER", "from": "PurchaseOrder", "to": "Supplier" }
+    }
+  ],
+  "note": "Synthetic only. No live plant, customer brand, or production PO numbers."
+}

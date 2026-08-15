@@ -1,0 +1,60 @@
+{
+  "domain": "supply-chain-planning",
+  "source": "samples/supply-chain/",
+  "objectTypes": [
+    {
+      "id": "Supplier",
+      "description": "Vendor that ships materials. Agent can name a supplier, read tier, and ask for open orders.",
+      "primaryKey": "id",
+      "properties": [
+        { "name": "id", "type": "string", "from": "supplier_orders.json#/supplier/id" },
+        { "name": "name", "type": "string", "from": "supplier_orders.json#/supplier/name" },
+        { "name": "tier", "type": "enum", "values": ["S", "A", "B", "C"], "from": "supplier_orders.json#/supplier/level" },
+        { "name": "region", "type": "string", "from": "supplier_orders.json#/supplier/region" }
+      ]
+    },
+    {
+      "id": "PurchaseOrder",
+      "description": "A buy-side order. Agent uses status and value to decide whether an approval action is allowed.",
+      "primaryKey": "order_id",
+      "properties": [
+        { "name": "order_id", "type": "string", "from": "supplier_orders.json#/order_id" },
+        { "name": "order_date", "type": "date", "from": "supplier_orders.json#/order_date" },
+        { "name": "status", "type": "enum", "values": ["draft", "open", "completed", "cancelled"] },
+        { "name": "amount", "type": "number", "derived": "sum(items.total)" }
+      ]
+    },
+    {
+      "id": "OrderLine",
+      "description": "SKU line on a purchase order.",
+      "primaryKey": "sku",
+      "properties": [
+        { "name": "sku", "type": "string" },
+        { "name": "quantity", "type": "number" },
+        { "name": "unit_price", "type": "number" }
+      ]
+    },
+    {
+      "id": "InventoryPolicy",
+      "description": "Safety stock / reorder / max stock for a material class. From the strategy brief, not live warehouse data.",
+      "primaryKey": "material_class",
+      "properties": [
+        { "name": "material_class", "type": "string" },
+        { "name": "safety_stock", "type": "number" },
+        { "name": "reorder_point", "type": "number" },
+        { "name": "max_stock", "type": "number" }
+      ]
+    },
+    {
+      "id": "Shipment",
+      "description": "Inbound logistics against a purchase order.",
+      "primaryKey": "order_id",
+      "properties": [
+        { "name": "carrier", "type": "string", "from": "supplier_orders.json#/logistics/carrier" },
+        { "name": "expected_days", "type": "number" },
+        { "name": "actual_days", "type": "number" },
+        { "name": "on_time", "type": "boolean" }
+      ]
+    }
+  ]
+}

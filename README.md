@@ -13,14 +13,15 @@ Inspired by Palantir-style ontology platforms and the open-source [nano-ontoprom
 | **Logic rule** | Constraints and state machines the agent must respect |
 | **Action** | Allowed operations (`Approve Record`, `Link Order to Supplier`) |
 
-## What is in this D1 snapshot
+## What is in this snapshot
 
 - English positioning README
 - `.env.example` (placeholders only)
 - Public-image `docker-compose.v2.yml` (no private registry)
 - Synthetic supply-chain sample under `samples/supply-chain/`
+- **Ontology mapping** under `samples/supply-chain/ontology/` — object types, links, logic rules, actions, and a pipeline from `supplier_orders.json`
 
-Runtime (FastAPI + React) lands in D2 after secret scan. Do **not** expect `docker compose up` to serve the full app from D1 alone.
+Sanitized FastAPI + React runtime is a later slice after secret scan. Do **not** expect `docker compose up` to serve the full app from this repo yet.
 
 ## Quick start (env only)
 

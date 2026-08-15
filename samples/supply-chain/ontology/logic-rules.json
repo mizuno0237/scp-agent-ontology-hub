@@ -1,0 +1,32 @@
+{
+  "domain": "supply-chain-planning",
+  "source": "samples/supply-chain/supply_chain_strategy.md",
+  "rules": [
+    {
+      "id": "PO_APPROVAL_BY_AMOUNT",
+      "kind": "constraint",
+      "text": "IF PurchaseOrder.amount >= 50000 AND PurchaseOrder.amount < 500000 THEN require manager approval",
+      "agentMust": "Do not fire SubmitPurchaseOrder until the matching approver action has succeeded."
+    },
+    {
+      "id": "PO_APPROVAL_VP",
+      "kind": "constraint",
+      "text": "IF PurchaseOrder.amount >= 500000 AND PurchaseOrder.amount < 2000000 THEN require supply-chain VP approval"
+    },
+    {
+      "id": "SUPPLIER_TIER_DOWNGRADE",
+      "kind": "state-machine",
+      "text": "IF Shipment.on_time rate over a window < 0.85 THEN Supplier.tier drops one grade and a corrective action is opened"
+    },
+    {
+      "id": "REORDER_TRIGGER",
+      "kind": "constraint",
+      "text": "IF on-hand < InventoryPolicy.safety_stock THEN the agent may propose CreateReplenishmentRequest"
+    },
+    {
+      "id": "EMERGENCY_BUY",
+      "kind": "constraint",
+      "text": "IF on-hand < InventoryPolicy.safety_stock * 0.5 THEN skip clerk approval and escalate"
+    }
+  ]
+}

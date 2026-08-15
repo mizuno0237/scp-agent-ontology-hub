@@ -1,0 +1,33 @@
+{
+  "domain": "supply-chain-planning",
+  "linkTypes": [
+    {
+      "id": "HAS_SUPPLIER",
+      "from": "PurchaseOrder",
+      "to": "Supplier",
+      "cardinality": "many-to-one",
+      "description": "PurchaseOrder -HAS_SUPPLIER-> Supplier"
+    },
+    {
+      "id": "HAS_LINE",
+      "from": "PurchaseOrder",
+      "to": "OrderLine",
+      "cardinality": "one-to-many",
+      "description": "PurchaseOrder -HAS_LINE-> OrderLine"
+    },
+    {
+      "id": "HAS_SHIPMENT",
+      "from": "PurchaseOrder",
+      "to": "Shipment",
+      "cardinality": "one-to-one",
+      "description": "PurchaseOrder -HAS_SHIPMENT-> Shipment"
+    },
+    {
+      "id": "GOVERNED_BY",
+      "from": "OrderLine",
+      "to": "InventoryPolicy",
+      "cardinality": "many-to-one",
+      "description": "SKU class maps to a safety-stock policy in the strategy brief"
+    }
+  ]
+}

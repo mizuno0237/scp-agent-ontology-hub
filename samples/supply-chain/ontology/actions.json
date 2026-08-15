@@ -1,0 +1,29 @@
+{
+  "domain": "supply-chain-planning",
+  "actions": [
+    {
+      "id": "LinkOrderToSupplier",
+      "objectType": "PurchaseOrder",
+      "description": "Write HAS_SUPPLIER. Blocked if the supplier is suspended (tier C for two quarters).",
+      "humanInTheLoop": false
+    },
+    {
+      "id": "ApprovePurchaseOrder",
+      "objectType": "PurchaseOrder",
+      "description": "Advance status from draft/open after the amount rule is satisfied.",
+      "humanInTheLoop": true
+    },
+    {
+      "id": "CreateReplenishmentRequest",
+      "objectType": "InventoryPolicy",
+      "description": "Open a buy request when stock is below safety. Agent proposes; planner confirms.",
+      "humanInTheLoop": true
+    },
+    {
+      "id": "FlagLateShipment",
+      "objectType": "Shipment",
+      "description": "Mark a receipt late and feed the supplier tier state machine.",
+      "humanInTheLoop": false
+    }
+  ]
+}
