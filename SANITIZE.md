@@ -8,10 +8,17 @@ This GitHub repo is a **sanitized public slice**.
 - Server / production compose files
 - `.env` files with real secrets
 - Real customer master data (named plants, live POs, client brands)
+- A GitLab `--mirror` of the internal ontology hub
 
 **OK to publish**
 
 - Architecture and ontology building blocks
 - Synthetic supply-chain samples
-- Sanitized runtime after secret scan
+- A rewritten FastAPI + React runtime that loads those samples
 - Synthetic ontology mapping (object / link / logic / action)
+
+**Scan before every push**
+
+```bash
+python scripts/scan-secrets.py
+```
