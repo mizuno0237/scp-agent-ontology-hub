@@ -45,3 +45,25 @@ def test_packaging_is_below_safety() -> None:
 def test_health() -> None:
     client = TestClient(app)
     assert client.get("/health").json()["ok"] is True
+
+
+def test_object_lookup_returns_po_and_incident_links() -> None:
+    client = TestClient(app)
+    payload = client.get("/api/objects/PurchaseOrder/PO-2024-0001").json()
+    assert payload["object"]["order_id"] == "PO-2024-0001"
+    assert payload["primaryKey"] == "order_id"
+    types = {link["type"] for link in payload["links"]}
+    assert "HAS_SUPPLIER" in types
+    assert "HAS_SHIPMENT" in types
+
+
+def test_object_lookup_404_for_unknown_type() -> None:
+    client = TestClient(app)
+    response = client.get("/api/objects/WorkOrder/WO-1842")
+    assert response.status_code == 404
+
+
+def test_object_lookup_404_for_missing_id() -> None:
+    client = TestClient(app)
+    response = client.get("/api/objects/PurchaseOrder/PO-MISSING")
+    assert response.status_code == 404

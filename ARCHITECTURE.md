@@ -16,6 +16,7 @@ flowchart TB
   end
   subgraph serve [Runtime]
     LOAD[Materialize instances]
+    LOOK[Object lookup]
     PREV[Action preview]
     API[FastAPI]
     UI[React ledger]
@@ -27,6 +28,8 @@ flowchart TB
   LR --> PREV
   AC --> PREV
   LOAD --> API
+  LOAD --> LOOK
+  LOOK --> API
   PREV --> API
   API --> UI
 ```
@@ -41,6 +44,7 @@ A planning agent has to name a supplier, walk `HAS_SUPPLIER`, and know whether `
 | Link type | A typed edge, not a free-text relation |
 | Logic rule | A gate the preview endpoint evaluates |
 | Action | A write the agent may propose, often with a human in the loop |
+| Object lookup | `GET /api/objects/{type}/{id}` — one instance and its incident links |
 
 ## What this repo is not
 

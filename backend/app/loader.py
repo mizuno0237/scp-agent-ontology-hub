@@ -190,3 +190,40 @@ def materialize_graph() -> dict[str, Any]:
         },
         "links": links,
     }
+
+
+PRIMARY_KEY = {
+    "Supplier": "id",
+    "PurchaseOrder": "order_id",
+    "OrderLine": "id",
+    "Shipment": "order_id",
+    "InventoryPolicy": "material_class",
+}
+
+
+def lookup_object(object_type: str, object_id: str) -> dict[str, Any] | None:
+    """Return one typed instance plus incident links, or None if the type is unknown."""
+    graph = materialize_graph()
+    rows = graph["instances"].get(object_type)
+    if rows is None:
+        return None
+    pk = PRIMARY_KEY[object_type]
+    found = next((row for row in rows if str(row[pk]) == object_id), None)
+    if found is None:
+        return {
+            "objectType": object_type,
+            "object": None,
+            "links": [],
+        }
+    incident = [
+        link
+        for link in graph["links"]
+        if link["from"] == object_id or link["to"] == object_id
+    ]
+    return {
+        "objectType": object_type,
+        "object": found,
+        "links": incident,
+        "primaryKey": pk,
+        "synthetic": True,
+    }

@@ -82,6 +82,14 @@ export type ActionPreview = {
   firedRules: string[];
 };
 
+export type ObjectLookup = {
+  objectType: string;
+  primaryKey: string;
+  synthetic: boolean;
+  object: Record<string, string | number | boolean | null>;
+  links: GraphPayload["links"];
+};
+
 export const TYPE_STAMP: Record<string, string> = {
   Supplier: "SUP",
   PurchaseOrder: "PO",

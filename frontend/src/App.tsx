@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { fetchGraph, fetchOntology, previewAction } from "./api";
-import { TYPE_STAMP, type ActionPreview, type GraphPayload, type OntologySchema } from "./types";
+import { fetchGraph, fetchObject, fetchOntology, previewAction } from "./api";
+import { TYPE_STAMP, type ActionPreview, type GraphPayload, type ObjectLookup, type OntologySchema } from "./types";
 
 const TYPE_ORDER = ["Supplier", "PurchaseOrder", "OrderLine", "Shipment", "InventoryPolicy"] as const;
 
@@ -12,6 +12,7 @@ export function App() {
   const [objectId, setObjectId] = useState<string>("PO-2024-0001");
   const [actionId, setActionId] = useState<string>("ApprovePurchaseOrder");
   const [preview, setPreview] = useState<ActionPreview | null>(null);
+  const [lookup, setLookup] = useState<ObjectLookup | null>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -36,6 +37,20 @@ export function App() {
     if (!graph) return [];
     return graph.links.filter((link) => link.from === objectId || link.to === objectId);
   }, [graph, objectId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchObject(typeId, objectId)
+      .then((next) => {
+        if (!cancelled) setLookup(next);
+      })
+      .catch(() => {
+        if (!cancelled) setLookup(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [typeId, objectId]);
 
   async function runPreview() {
     setBusy(true);
@@ -151,6 +166,18 @@ export function App() {
               </select>
             </label>
           </div>
+          {lookup?.object ? (
+            <dl className="props">
+              {Object.entries(lookup.object).map(([key, value]) => (
+                <div key={key}>
+                  <dt>{key}</dt>
+                  <dd>{value === null ? "—" : String(value)}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : (
+            <p className="muted">Lookup {typeId}/{objectId}…</p>
+          )}
           <table>
             <thead>
               <tr>

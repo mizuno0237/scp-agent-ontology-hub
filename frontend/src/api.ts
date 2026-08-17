@@ -1,4 +1,4 @@
-import type { ActionPreview, GraphPayload, OntologySchema } from "./types";
+import type { ActionPreview, GraphPayload, ObjectLookup, OntologySchema } from "./types";
 
 async function getJson<T>(path: string): Promise<T> {
   const response = await fetch(path);
@@ -14,6 +14,10 @@ export function fetchOntology(): Promise<OntologySchema> {
 
 export function fetchGraph(): Promise<GraphPayload> {
   return getJson("/api/graph");
+}
+
+export function fetchObject(objectType: string, objectId: string): Promise<ObjectLookup> {
+  return getJson(`/api/objects/${encodeURIComponent(objectType)}/${encodeURIComponent(objectId)}`);
 }
 
 export async function previewAction(actionId: string, objectId: string | null): Promise<ActionPreview> {
