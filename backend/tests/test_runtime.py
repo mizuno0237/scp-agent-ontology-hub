@@ -67,3 +67,26 @@ def test_object_lookup_404_for_missing_id() -> None:
     client = TestClient(app)
     response = client.get("/api/objects/PurchaseOrder/PO-MISSING")
     assert response.status_code == 404
+
+
+def test_walk_has_supplier_from_purchase_order() -> None:
+    client = TestClient(app)
+    payload = client.get("/api/objects/PurchaseOrder/PO-2024-0001/walk/HAS_SUPPLIER").json()
+    assert payload["linkType"] == "HAS_SUPPLIER"
+    assert len(payload["neighbors"]) == 1
+    neighbor = payload["neighbors"][0]
+    assert neighbor["objectType"] == "Supplier"
+    assert neighbor["object"]["id"]
+    assert neighbor["via"]["type"] == "HAS_SUPPLIER"
+
+
+def test_walk_unknown_link_returns_empty_neighbors() -> None:
+    client = TestClient(app)
+    payload = client.get("/api/objects/PurchaseOrder/PO-2024-0001/walk/MADE_UP_EDGE").json()
+    assert payload["neighbors"] == []
+
+
+def test_walk_404_for_missing_id() -> None:
+    client = TestClient(app)
+    response = client.get("/api/objects/PurchaseOrder/PO-MISSING/walk/HAS_SUPPLIER")
+    assert response.status_code == 404

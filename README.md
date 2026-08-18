@@ -52,6 +52,7 @@ The agent does not invent suppliers or approval thresholds from prompt text. It 
 - English positioning README and architecture diagram
 - FastAPI runtime that materializes the sample graph from JSON
 - `GET /api/objects/{type}/{id}` — typed instance + incident links (agent read, not a dump of the whole graph)
+- `GET /api/objects/{type}/{id}/walk/{linkType}` — follow one named edge (for example `HAS_SUPPLIER`)
 - React explorer (title-block ledger + action preview)
 - Public-image `docker-compose.v2.yml` (backend + frontend only)
 - `.env.example` (placeholders only)
@@ -87,6 +88,7 @@ Agent read (no chat, no prompt stuffing):
 
 ```bash
 curl http://localhost:8000/api/objects/PurchaseOrder/PO-2024-0001
+curl http://localhost:8000/api/objects/PurchaseOrder/PO-2024-0001/walk/HAS_SUPPLIER
 ```
 
 ## Secret scan

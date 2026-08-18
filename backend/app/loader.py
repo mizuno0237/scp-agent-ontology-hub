@@ -204,6 +204,10 @@ PRIMARY_KEY = {
 def lookup_object(object_type: str, object_id: str) -> dict[str, Any] | None:
     """Return one typed instance plus incident links, or None if the type is unknown."""
     graph = materialize_graph()
+    return _lookup_in_graph(graph, object_type, object_id)
+
+
+def _lookup_in_graph(graph: dict[str, Any], object_type: str, object_id: str) -> dict[str, Any] | None:
     rows = graph["instances"].get(object_type)
     if rows is None:
         return None
@@ -225,5 +229,51 @@ def lookup_object(object_type: str, object_id: str) -> dict[str, Any] | None:
         "object": found,
         "links": incident,
         "primaryKey": pk,
+        "synthetic": True,
+    }
+
+
+def walk_link(object_type: str, object_id: str, link_type: str) -> dict[str, Any] | None:
+    """Follow one named link type from an instance. The agent walks edges; it does not guess them."""
+    graph = materialize_graph()
+    origin = _lookup_in_graph(graph, object_type, object_id)
+    if origin is None:
+        return None
+    if origin["object"] is None:
+        return {
+            "objectType": object_type,
+            "objectId": object_id,
+            "linkType": link_type,
+            "object": None,
+            "neighbors": [],
+        }
+
+    neighbors: list[dict[str, Any]] = []
+    for link in origin["links"]:
+        if link["type"] != link_type:
+            continue
+        if link["fromType"] == object_type and str(link["from"]) == object_id:
+            ntype, nid = link["toType"], str(link["to"])
+        elif link["toType"] == object_type and str(link["to"]) == object_id:
+            ntype, nid = link["fromType"], str(link["from"])
+        else:
+            continue
+        found = _lookup_in_graph(graph, ntype, nid)
+        if not found or found["object"] is None:
+            continue
+        neighbors.append(
+            {
+                "objectType": ntype,
+                "object": found["object"],
+                "via": link,
+            }
+        )
+
+    return {
+        "objectType": object_type,
+        "objectId": object_id,
+        "linkType": link_type,
+        "object": origin["object"],
+        "neighbors": neighbors,
         "synthetic": True,
     }

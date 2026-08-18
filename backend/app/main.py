@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from .actions import preview_action
-from .loader import load_schema, lookup_object, materialize_graph
+from .loader import load_schema, lookup_object, materialize_graph, walk_link
 
 app = FastAPI(
     title="SCP Agent Ontology Hub",
@@ -43,7 +43,17 @@ def graph() -> dict[str, Any]:
     return materialize_graph()
 
 
-@app.get("/api/objects/{object_type}/{object_id:path}")
+@app.get("/api/objects/{object_type}/{object_id}/walk/{link_type}")
+def object_walk(object_type: str, object_id: str, link_type: str) -> dict[str, Any]:
+    payload = walk_link(object_type, object_id, link_type)
+    if payload is None:
+        raise HTTPException(status_code=404, detail=f"Unknown object type {object_type}")
+    if payload["object"] is None:
+        raise HTTPException(status_code=404, detail=f"{object_type} {object_id} is not in the sample graph")
+    return payload
+
+
+@app.get("/api/objects/{object_type}/{object_id}")
 def object_lookup(object_type: str, object_id: str) -> dict[str, Any]:
     payload = lookup_object(object_type, object_id)
     if payload is None:
