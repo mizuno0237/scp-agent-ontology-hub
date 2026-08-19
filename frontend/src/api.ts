@@ -1,4 +1,4 @@
-import type { ActionPreview, GraphPayload, ObjectLookup, OntologySchema } from "./types";
+import type { ActionPreview, GraphPayload, ObjectLookup, OntologySchema, WalkPayload } from "./types";
 
 async function getJson<T>(path: string): Promise<T> {
   const response = await fetch(path);
@@ -18,6 +18,12 @@ export function fetchGraph(): Promise<GraphPayload> {
 
 export function fetchObject(objectType: string, objectId: string): Promise<ObjectLookup> {
   return getJson(`/api/objects/${encodeURIComponent(objectType)}/${encodeURIComponent(objectId)}`);
+}
+
+export function fetchWalk(objectType: string, objectId: string, linkType: string): Promise<WalkPayload> {
+  return getJson(
+    `/api/objects/${encodeURIComponent(objectType)}/${encodeURIComponent(objectId)}/walk/${encodeURIComponent(linkType)}`
+  );
 }
 
 export async function previewAction(actionId: string, objectId: string | null): Promise<ActionPreview> {

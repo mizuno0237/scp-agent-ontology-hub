@@ -90,6 +90,19 @@ export type ObjectLookup = {
   links: GraphPayload["links"];
 };
 
+export type WalkPayload = {
+  objectType: string;
+  objectId: string;
+  linkType: string;
+  synthetic: boolean;
+  object: Record<string, string | number | boolean | null>;
+  neighbors: {
+    objectType: string;
+    object: Record<string, string | number | boolean | null>;
+    via: GraphPayload["links"][number];
+  }[];
+};
+
 export const TYPE_STAMP: Record<string, string> = {
   Supplier: "SUP",
   PurchaseOrder: "PO",

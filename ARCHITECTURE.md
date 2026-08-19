@@ -45,7 +45,7 @@ A planning agent has to name a supplier, walk `HAS_SUPPLIER`, and know whether `
 | Logic rule | A gate the preview endpoint evaluates |
 | Action | A write the agent may propose, often with a human in the loop |
 | Object lookup | `GET /api/objects/{type}/{id}` — one instance and its incident links |
-| Link walk | `GET /api/objects/{type}/{id}/walk/{linkType}` — neighbors on one named edge |
+| Link walk | `GET /api/objects/{type}/{id}/walk/{linkType}` — neighbors on one named edge; the explorer walks the same path when you click a link row |
 
 ## What this repo is not
 

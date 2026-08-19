@@ -1,8 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-import { fetchGraph, fetchObject, fetchOntology, previewAction } from "./api";
-import { TYPE_STAMP, type ActionPreview, type GraphPayload, type ObjectLookup, type OntologySchema } from "./types";
+import { fetchGraph, fetchObject, fetchOntology, fetchWalk, previewAction } from "./api";
+import { TYPE_STAMP, type ActionPreview, type GraphPayload, type ObjectLookup, type OntologySchema, type WalkPayload } from "./types";
 
 const TYPE_ORDER = ["Supplier", "PurchaseOrder", "OrderLine", "Shipment", "InventoryPolicy"] as const;
+
+function neighborKey(schema: OntologySchema, neighbor: WalkPayload["neighbors"][number]): string | null {
+  if (neighbor.via.toType === neighbor.objectType) return neighbor.via.to;
+  if (neighbor.via.fromType === neighbor.objectType) return neighbor.via.from;
+  const pk = schema.objectTypes.objectTypes.find((row) => row.id === neighbor.objectType)?.primaryKey;
+  if (pk && neighbor.object[pk] != null) return String(neighbor.object[pk]);
+  return null;
+}
 
 export function App() {
   const [schema, setSchema] = useState<OntologySchema | null>(null);
@@ -13,7 +21,9 @@ export function App() {
   const [actionId, setActionId] = useState<string>("ApprovePurchaseOrder");
   const [preview, setPreview] = useState<ActionPreview | null>(null);
   const [lookup, setLookup] = useState<ObjectLookup | null>(null);
+  const [walk, setWalk] = useState<WalkPayload | null>(null);
   const [busy, setBusy] = useState(false);
+  const [walking, setWalking] = useState(false);
 
   useEffect(() => {
     Promise.all([fetchOntology(), fetchGraph()])
@@ -40,6 +50,7 @@ export function App() {
 
   useEffect(() => {
     let cancelled = false;
+    setWalk(null);
     fetchObject(typeId, objectId)
       .then((next) => {
         if (!cancelled) setLookup(next);
@@ -60,6 +71,17 @@ export function App() {
       setError(err instanceof Error ? err.message : "preview failed");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function runWalk(linkType: string) {
+    setWalking(true);
+    try {
+      setWalk(await fetchWalk(typeId, objectId, linkType));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "walk failed");
+    } finally {
+      setWalking(false);
     }
   }
 
@@ -187,8 +209,12 @@ export function App() {
               </tr>
             </thead>
             <tbody>
-              {edges.map((link) => (
-                <tr key={`${link.type}-${link.from}-${link.to}`}>
+              {(lookup?.links ?? edges).map((link) => (
+                <tr
+                  key={`${link.type}-${link.from}-${link.to}`}
+                  className={walk?.linkType === link.type ? "walkable is-walked" : "walkable"}
+                  onClick={() => void runWalk(link.type)}
+                >
                   <td>
                     <code>{link.type}</code>
                   </td>
@@ -204,7 +230,42 @@ export function App() {
               ))}
             </tbody>
           </table>
-          {edges.length === 0 ? <p className="muted">No edges on this row.</p> : null}
+          {(lookup?.links ?? edges).length === 0 ? <p className="muted">No edges on this row.</p> : (
+            <p className="muted">{walking ? "Walking named link…" : "Click a link to walk one typed edge."}</p>
+          )}
+          {walk ? (
+            <div className="neighbors">
+              <h3>
+                Walk <code>{walk.linkType}</code>
+              </h3>
+              {walk.neighbors.length === 0 ? (
+                <p className="muted">No neighbor on this edge.</p>
+              ) : (
+                <ul>
+                  {walk.neighbors.map((neighbor) => {
+                    const id = neighborKey(schema, neighbor);
+                    return (
+                      <li key={`${neighbor.objectType}-${id ?? "unknown"}`}>
+                        <button
+                          type="button"
+                          disabled={!id}
+                          onClick={() => {
+                            if (!id) return;
+                            setTypeId(neighbor.objectType);
+                            setObjectId(id);
+                          }}
+                        >
+                          <span className="stamp stamp--tiny">{TYPE_STAMP[neighbor.objectType]}</span>
+                          <strong>{neighbor.objectType}</strong>
+                          <span>{id ?? "—"}</span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          ) : null}
         </section>
 
         <section className="action-bay">
