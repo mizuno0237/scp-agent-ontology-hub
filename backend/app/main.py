@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 
 from .actions import preview_action
 from .loader import load_schema, lookup_object, materialize_graph, walk_link
+from .mcp import call_tool, list_tools
 
 app = FastAPI(
     title="SCP Agent Ontology Hub",
@@ -26,6 +27,11 @@ app.add_middleware(
 class PreviewBody(BaseModel):
     actionId: str
     objectId: str | None = Field(default=None)
+
+
+class McpCallBody(BaseModel):
+    name: str
+    arguments: dict[str, Any] = Field(default_factory=dict)
 
 
 @app.get("/health")
@@ -68,3 +74,18 @@ def actions_preview(body: PreviewBody) -> dict[str, Any]:
     if not body.actionId:
         raise HTTPException(status_code=400, detail="actionId is required")
     return preview_action(materialize_graph(), body.actionId, body.objectId)
+
+
+@app.get("/api/mcp/tools")
+def mcp_tools() -> dict[str, Any]:
+    return list_tools()
+
+
+@app.post("/api/mcp/call")
+def mcp_call(body: McpCallBody) -> dict[str, Any]:
+    if not body.name:
+        raise HTTPException(status_code=400, detail="name is required")
+    payload = call_tool(body.name, body.arguments)
+    if not payload["ok"] and payload.get("error", "").startswith("unknown tool"):
+        raise HTTPException(status_code=404, detail=payload["error"])
+    return payload

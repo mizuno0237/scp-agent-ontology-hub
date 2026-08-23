@@ -90,3 +90,40 @@ def test_walk_404_for_missing_id() -> None:
     client = TestClient(app)
     response = client.get("/api/objects/PurchaseOrder/PO-MISSING/walk/HAS_SUPPLIER")
     assert response.status_code == 404
+
+
+def test_mcp_lists_read_tools() -> None:
+    client = TestClient(app)
+    payload = client.get("/api/mcp/tools").json()
+    names = {row["name"] for row in payload["tools"]}
+    assert payload["readOnly"] is True
+    assert names == {
+        "list_object_types",
+        "inspect_object_type",
+        "lookup_object",
+        "walk_link",
+        "preview_action",
+    }
+
+
+def test_mcp_walk_has_supplier() -> None:
+    client = TestClient(app)
+    payload = client.post(
+        "/api/mcp/call",
+        json={
+            "name": "walk_link",
+            "arguments": {
+                "objectType": "PurchaseOrder",
+                "objectId": "PO-2024-0001",
+                "linkType": "HAS_SUPPLIER",
+            },
+        },
+    ).json()
+    assert payload["ok"] is True
+    assert payload["result"]["neighbors"][0]["objectType"] == "Supplier"
+
+
+def test_mcp_unknown_tool_is_404() -> None:
+    client = TestClient(app)
+    response = client.post("/api/mcp/call", json={"name": "drop_table", "arguments": {}})
+    assert response.status_code == 404
