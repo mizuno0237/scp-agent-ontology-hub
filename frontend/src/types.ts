@@ -103,6 +103,25 @@ export type WalkPayload = {
   }[];
 };
 
+export type McpTool = {
+  name: string;
+  description: string;
+  arguments: string[];
+};
+
+export type McpCatalog = {
+  protocol: string;
+  readOnly: boolean;
+  tools: McpTool[];
+};
+
+export type McpCall = {
+  ok: boolean;
+  tool: string;
+  result?: unknown;
+  error?: string;
+};
+
 export const TYPE_STAMP: Record<string, string> = {
   Supplier: "SUP",
   PurchaseOrder: "PO",

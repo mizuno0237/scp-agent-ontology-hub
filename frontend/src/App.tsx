@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { fetchGraph, fetchObject, fetchOntology, fetchWalk, previewAction } from "./api";
-import { TYPE_STAMP, type ActionPreview, type GraphPayload, type ObjectLookup, type OntologySchema, type WalkPayload } from "./types";
+import { callMcp, fetchGraph, fetchMcpTools, fetchObject, fetchOntology, fetchWalk, previewAction } from "./api";
+import { TYPE_STAMP, type ActionPreview, type GraphPayload, type McpCall, type McpCatalog, type ObjectLookup, type OntologySchema, type WalkPayload } from "./types";
 
 const TYPE_ORDER = ["Supplier", "PurchaseOrder", "OrderLine", "Shipment", "InventoryPolicy"] as const;
 
@@ -24,12 +24,15 @@ export function App() {
   const [walk, setWalk] = useState<WalkPayload | null>(null);
   const [busy, setBusy] = useState(false);
   const [walking, setWalking] = useState(false);
+  const [mcp, setMcp] = useState<McpCatalog | null>(null);
+  const [mcpCall, setMcpCall] = useState<McpCall | null>(null);
 
   useEffect(() => {
-    Promise.all([fetchOntology(), fetchGraph()])
-      .then(([nextSchema, nextGraph]) => {
+    Promise.all([fetchOntology(), fetchGraph(), fetchMcpTools()])
+      .then(([nextSchema, nextGraph, nextMcp]) => {
         setSchema(nextSchema);
         setGraph(nextGraph);
+        setMcp(nextMcp);
       })
       .catch((err: Error) => setError(err.message));
   }, []);
@@ -69,6 +72,17 @@ export function App() {
       setPreview(await previewAction(actionId, objectId));
     } catch (err) {
       setError(err instanceof Error ? err.message : "preview failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function runMcp(name: string, arguments_: Record<string, string>) {
+    setBusy(true);
+    try {
+      setMcpCall(await callMcp(name, arguments_));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "mcp failed");
     } finally {
       setBusy(false);
     }
@@ -298,6 +312,37 @@ export function App() {
               ) : (
                 <p className="muted">No rule fired.</p>
               )}
+            </output>
+          ) : null}
+
+          <h3>Agent tools</h3>
+          <p className="muted">Same reads the planning agent calls. MCP-style catalog, not a live IPS metadata server.</p>
+          {mcp ? (
+            <ul className="rules">
+              {mcp.tools.map((tool) => (
+                <li key={tool.name}>
+                  <code>{tool.name}</code>
+                  <span>{tool.description}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="muted">Loading tool catalog…</p>
+          )}
+          <button
+            type="button"
+            className="run"
+            disabled={busy}
+            onClick={() =>
+              void runMcp("walk_link", { objectType: typeId, objectId, linkType: "HAS_SUPPLIER" })
+            }
+          >
+            {busy ? "Calling tool…" : "Call walk_link HAS_SUPPLIER"}
+          </button>
+          {mcpCall ? (
+            <output className={mcpCall.ok ? "ok" : "no"}>
+              <strong>{mcpCall.tool}</strong>
+              <p>{mcpCall.ok ? "ok" : mcpCall.error}</p>
             </output>
           ) : null}
 
