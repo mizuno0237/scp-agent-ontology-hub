@@ -53,7 +53,8 @@ The agent does not invent suppliers or approval thresholds from prompt text. It 
 - FastAPI runtime that materializes the sample graph from JSON
 - `GET /api/objects/{type}/{id}` — typed instance + incident links (agent read, not a dump of the whole graph)
 - `GET /api/objects/{type}/{id}/walk/{linkType}` — follow one named edge (for example `HAS_SUPPLIER`)
-- React explorer (title-block ledger + named-link walk + action preview)
+- `GET /api/mcp/tools` + `POST /api/mcp/call` — MCP-style catalog over those same reads (not a live IPS metadata server)
+- React explorer (title-block ledger + named-link walk + action preview + tool catalog)
 - Public-image `docker-compose.v2.yml` (backend + frontend only)
 - `.env.example` (placeholders only)
 - Synthetic supply-chain sample and ontology mapping under `samples/supply-chain/`
@@ -89,6 +90,8 @@ Agent read (no chat, no prompt stuffing):
 ```bash
 curl http://localhost:8000/api/objects/PurchaseOrder/PO-2024-0001
 curl http://localhost:8000/api/objects/PurchaseOrder/PO-2024-0001/walk/HAS_SUPPLIER
+curl http://localhost:8000/api/mcp/tools
+curl -X POST http://localhost:8000/api/mcp/call -H "Content-Type: application/json" -d "{\"name\":\"walk_link\",\"arguments\":{\"objectType\":\"PurchaseOrder\",\"objectId\":\"PO-2024-0001\",\"linkType\":\"HAS_SUPPLIER\"}}"
 ```
 
 ## Secret scan

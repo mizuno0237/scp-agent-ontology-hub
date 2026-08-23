@@ -17,6 +17,7 @@ flowchart TB
   subgraph serve [Runtime]
     LOAD[Materialize instances]
     LOOK[Object lookup]
+    MCP[MCP-style tools]
     PREV[Action preview]
     API[FastAPI]
     UI[React ledger]
@@ -30,6 +31,8 @@ flowchart TB
   LOAD --> API
   LOAD --> LOOK
   LOOK --> API
+  LOOK --> MCP
+  MCP --> API
   PREV --> API
   API --> UI
 ```
@@ -46,6 +49,7 @@ A planning agent has to name a supplier, walk `HAS_SUPPLIER`, and know whether `
 | Action | A write the agent may propose, often with a human in the loop |
 | Object lookup | `GET /api/objects/{type}/{id}` — one instance and its incident links |
 | Link walk | `GET /api/objects/{type}/{id}/walk/{linkType}` — neighbors on one named edge; the explorer walks the same path when you click a link row |
+| MCP-style tools | `GET /api/mcp/tools` + `POST /api/mcp/call` — list / inspect / lookup / walk / preview. Public catalog only; not the internal SCP metadata MCP |
 
 ## What this repo is not
 
