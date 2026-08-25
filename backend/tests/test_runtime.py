@@ -103,6 +103,7 @@ def test_mcp_lists_read_tools() -> None:
         "lookup_object",
         "walk_link",
         "preview_action",
+        "search_objects",
     }
 
 
@@ -127,3 +128,30 @@ def test_mcp_unknown_tool_is_404() -> None:
     client = TestClient(app)
     response = client.post("/api/mcp/call", json={"name": "drop_table", "arguments": {}})
     assert response.status_code == 404
+
+
+def test_mcp_search_finds_packaging_policy() -> None:
+    client = TestClient(app)
+    payload = client.post(
+        "/api/mcp/call",
+        json={"name": "search_objects", "arguments": {"query": "packaging"}},
+    ).json()
+    assert payload["ok"] is True
+    ids = {row["objectId"] for row in payload["result"]["hits"]}
+    assert "packaging" in ids
+    types = {row["objectType"] for row in payload["result"]["hits"]}
+    assert "InventoryPolicy" in types
+
+
+def test_mcp_search_can_narrow_to_purchase_orders() -> None:
+    client = TestClient(app)
+    payload = client.post(
+        "/api/mcp/call",
+        json={
+            "name": "search_objects",
+            "arguments": {"query": "PO-2024-0001", "objectType": "PurchaseOrder"},
+        },
+    ).json()
+    assert payload["ok"] is True
+    assert payload["result"]["count"] == 1
+    assert payload["result"]["hits"][0]["objectId"] == "PO-2024-0001"

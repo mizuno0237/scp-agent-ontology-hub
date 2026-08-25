@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Any
 
 from .actions import preview_action
-from .loader import load_schema, lookup_object, materialize_graph, walk_link
+from .loader import load_schema, lookup_object, materialize_graph, search_objects, walk_link
 
 TOOLS: list[dict[str, Any]] = [
     {
@@ -36,6 +36,11 @@ TOOLS: list[dict[str, Any]] = [
         "name": "preview_action",
         "description": "Ask whether a write is allowed against the logic rules.",
         "arguments": ["actionId", "objectId"],
+    },
+    {
+        "name": "search_objects",
+        "description": "Find sample instances by a substring. Optional objectType narrows the scan.",
+        "arguments": ["query", "objectType"],
     },
 ]
 
@@ -98,6 +103,14 @@ def call_tool(name: str, arguments: dict[str, Any] | None = None) -> dict[str, A
         if fault:
             return {"ok": False, "tool": name, "error": fault}
         result = preview_action(graph, str(args["actionId"]), args.get("objectId"))
+        return {"ok": True, "tool": name, "result": result}
+
+    if name == "search_objects":
+        fault = _missing("query", args=args)
+        if fault:
+            return {"ok": False, "tool": name, "error": fault}
+        object_type = str(args["objectType"]) if args.get("objectType") else None
+        result = search_objects(str(args["query"]), object_type)
         return {"ok": True, "tool": name, "result": result}
 
     return {"ok": False, "tool": name, "error": f"unknown tool {name}"}

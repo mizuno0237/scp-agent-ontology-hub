@@ -277,3 +277,21 @@ def walk_link(object_type: str, object_id: str, link_type: str) -> dict[str, Any
         "neighbors": neighbors,
         "synthetic": True,
     }
+
+
+def search_objects(query: str, object_type: str | None = None) -> dict[str, Any]:
+    """Substring search over sample instances. The agent names a query; it does not dump the graph."""
+    needle = str(query or "").strip().lower()
+    graph = materialize_graph()
+    hits: list[dict[str, Any]] = []
+    if not needle:
+        return {"query": query, "objectType": object_type, "count": 0, "hits": []}
+    for type_name, rows in graph["instances"].items():
+        if object_type and type_name != object_type:
+            continue
+        pk = PRIMARY_KEY[type_name]
+        for row in rows:
+            blob = " ".join(str(value) for value in row.values()).lower()
+            if needle in blob:
+                hits.append({"objectType": type_name, "objectId": str(row[pk]), "object": row})
+    return {"query": query, "objectType": object_type, "count": len(hits), "hits": hits}
