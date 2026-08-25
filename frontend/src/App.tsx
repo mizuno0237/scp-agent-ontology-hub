@@ -339,6 +339,14 @@ export function App() {
           >
             {busy ? "Calling tool…" : "Call walk_link HAS_SUPPLIER"}
           </button>
+          <button
+            type="button"
+            className="run"
+            disabled={busy}
+            onClick={() => void runMcp("search_objects", { query: "packaging" })}
+          >
+            {busy ? "Calling tool…" : "Call search_objects packaging"}
+          </button>
           {mcpCall ? (
             <output className={mcpCall.ok ? "ok" : "no"}>
               <strong>{mcpCall.tool}</strong>

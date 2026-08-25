@@ -7,6 +7,7 @@ list_object_types
   -> inspect_object_type
     -> lookup_object
       -> walk_link
+    -> search_objects
         -> preview_action
 ```
 
@@ -17,6 +18,7 @@ list_object_types
 | `lookup_object` | `objectType`, `objectId` | `GET /api/objects/{type}/{id}` |
 | `walk_link` | `objectType`, `objectId`, `linkType` | `GET /api/objects/{type}/{id}/walk/{linkType}` |
 | `preview_action` | `actionId`, `objectId` | `POST /api/actions/preview` |
+| `search_objects` | `query`, optional `objectType` | Substring scan of sample instances |
 
 `GET /api/mcp/tools` is the catalog. `POST /api/mcp/call` runs one tool.
 
