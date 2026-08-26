@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from .actions import preview_action
-from .loader import load_schema, lookup_object, materialize_graph, walk_link
+from .loader import load_schema, lookup_object, materialize_graph, search_objects, walk_link
 from .mcp import call_tool, list_tools
 
 app = FastAPI(
@@ -47,6 +47,13 @@ def ontology() -> dict[str, Any]:
 @app.get("/api/graph")
 def graph() -> dict[str, Any]:
     return materialize_graph()
+
+
+@app.get("/api/search")
+def object_search(q: str, objectType: str | None = None) -> dict[str, Any]:
+    if not q.strip():
+        raise HTTPException(status_code=400, detail="q is required")
+    return search_objects(q, objectType)
 
 
 @app.get("/api/objects/{object_type}/{object_id}/walk/{link_type}")

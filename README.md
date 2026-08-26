@@ -90,6 +90,7 @@ Agent read (no chat, no prompt stuffing):
 ```bash
 curl http://localhost:8000/api/objects/PurchaseOrder/PO-2024-0001
 curl http://localhost:8000/api/objects/PurchaseOrder/PO-2024-0001/walk/HAS_SUPPLIER
+curl http://localhost:8000/api/search?q=packaging
 curl http://localhost:8000/api/mcp/tools
 curl -X POST http://localhost:8000/api/mcp/call -H "Content-Type: application/json" -d "{\"name\":\"walk_link\",\"arguments\":{\"objectType\":\"PurchaseOrder\",\"objectId\":\"PO-2024-0001\",\"linkType\":\"HAS_SUPPLIER\"}}"
 ```

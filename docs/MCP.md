@@ -18,7 +18,7 @@ list_object_types
 | `lookup_object` | `objectType`, `objectId` | `GET /api/objects/{type}/{id}` |
 | `walk_link` | `objectType`, `objectId`, `linkType` | `GET /api/objects/{type}/{id}/walk/{linkType}` |
 | `preview_action` | `actionId`, `objectId` | `POST /api/actions/preview` |
-| `search_objects` | `query`, optional `objectType` | Substring scan of sample instances |
+| `search_objects` | `query`, optional `objectType` | `GET /api/search?q=` · substring scan |
 
 `GET /api/mcp/tools` is the catalog. `POST /api/mcp/call` runs one tool.
 

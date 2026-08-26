@@ -155,3 +155,10 @@ def test_mcp_search_can_narrow_to_purchase_orders() -> None:
     assert payload["ok"] is True
     assert payload["result"]["count"] == 1
     assert payload["result"]["hits"][0]["objectId"] == "PO-2024-0001"
+
+
+def test_search_http_finds_packaging_policy() -> None:
+    client = TestClient(app)
+    payload = client.get("/api/search", params={"q": "packaging"}).json()
+    ids = {row["objectId"] for row in payload["hits"]}
+    assert "packaging" in ids
